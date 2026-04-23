@@ -1,99 +1,242 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Stage 2 Backend — Intelligence Query Engine
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A queryable demographic intelligence API built with **NestJS**, **Prisma**, and **Supabase (PostgreSQL)**. It stores 2026 user profiles and exposes advanced filtering, sorting, pagination, and natural language search.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+---
 
-## Description
+## Tech Stack
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Framework:** NestJS (Node.js)
+- **Language:** TypeScript
+- **ORM:** Prisma v6
+- **Database:** Supabase (PostgreSQL)
+- **Package Manager:** pnpm
+- **Deployment:** Vercel
 
-## Project setup
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js v18+
+- pnpm
+- A Supabase project with a PostgreSQL database
+
+### Installation
 
 ```bash
-$ pnpm install
+git clone <your-repo-url>
+cd stage-2-task
+pnpm install
 ```
 
-## Compile and run the project
+### Environment Variables
+
+Create a `.env` file at the project root:
+
+```env
+DATABASE_URL="postgresql://postgres.[ref]:[password]@aws-1-eu-west-2.pooler.supabase.com:6543/postgres?pgbouncer=true"
+DIRECT_URL="postgresql://postgres.[ref]:[password]@aws-1-eu-west-2.pooler.supabase.com:5432/postgres"
+```
+
+- `DATABASE_URL` — Supabase pooler connection (used by the app at runtime)
+- `DIRECT_URL` — Direct connection (used for migrations and seeding)
+
+### Database Setup
 
 ```bash
-# development
-$ pnpm run start
+# Run migrations
+pnpm prisma migrate deploy
 
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+# Seed the database with 2026 profiles
+pnpm prisma db seed
 ```
 
-## Run tests
+### Run Locally
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm start:dev
 ```
 
-## Deployment
+Server runs at `http://localhost:3009`.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+---
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## API Reference
+
+### Base URL
+
+```
+http://localhost:3009
+```
+
+---
+
+### GET /api/profiles
+
+Returns a paginated, filterable, sortable list of profiles.
+
+**Query Parameters**
+
+| Parameter               | Type   | Description                                      |
+|------------------------|--------|--------------------------------------------------|
+| `gender`               | string | Filter by gender: `male` or `female`             |
+| `age_group`            | string | Filter by age group: `child`, `teenager`, `adult`, `senior` |
+| `country_id`           | string | Filter by ISO country code e.g. `NG`, `KE`      |
+| `min_age`              | number | Minimum age (inclusive)                          |
+| `max_age`              | number | Maximum age (inclusive)                          |
+| `min_gender_probability` | number | Minimum gender confidence score (0–1)          |
+| `min_country_probability` | number | Minimum country confidence score (0–1)        |
+| `sort_by`              | string | Sort field: `age`, `created_at`, `gender_probability` |
+| `order`                | string | Sort direction: `asc` or `desc` (default: `desc`) |
+| `page`                 | number | Page number (default: `1`)                       |
+| `limit`                | number | Results per page (default: `10`, max: `50`)      |
+
+**Example Request**
+
+```
+GET /api/profiles?gender=male&country_id=NG&min_age=25&sort_by=age&order=asc&page=1&limit=10
+```
+
+**Example Response**
+
+```json
+{
+  "status": "success",
+  "page": 1,
+  "limit": 10,
+  "total": 312,
+  "data": [
+    {
+      "id": "019db9a3-5c64-7ecd-b7f4-616ade9bc971",
+      "name": "John Doe",
+      "gender": "male",
+      "gender_probability": 0.98,
+      "age": 26,
+      "age_group": "adult",
+      "country_id": "NG",
+      "country_name": "Nigeria",
+      "country_probability": 0.95,
+      "created_at": "2026-04-23T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+---
+
+### GET /api/profiles/search
+
+Natural language search endpoint. Converts plain English queries into structured filters.
+
+**Query Parameters**
+
+| Parameter | Type   | Description                        |
+|-----------|--------|------------------------------------|
+| `q`       | string | Natural language query (required)  |
+| `page`    | number | Page number (default: `1`)         |
+| `limit`   | number | Results per page (default: `10`, max: `50`) |
+
+**Example Request**
+
+```
+GET /api/profiles/search?q=young males from nigeria&page=1&limit=10
+```
+
+**Supported Query Patterns**
+
+| Natural Language Query                  | Resolved Filters                                  |
+|----------------------------------------|---------------------------------------------------|
+| `young males`                          | `gender=male`, `min_age=16`, `max_age=24`         |
+| `females above 30`                     | `gender=female`, `min_age=30`                     |
+| `people from angola`                   | `country_id=AO`                                   |
+| `adult males from kenya`               | `gender=male`, `age_group=adult`, `country_id=KE` |
+| `male and female teenagers above 17`   | `age_group=teenager`, `min_age=17`                |
+
+> **Note:** Parsing is rule-based only — no AI or LLMs are used. `young` maps to ages 16–24 for parsing purposes only and is not a stored age group.
+
+**Unrecognised Query Response**
+
+```json
+{
+  "status": "error",
+  "message": "Unable to interpret query"
+}
+```
+
+---
+
+## Error Responses
+
+All errors follow this structure:
+
+```json
+{
+  "status": "error",
+  "message": "<description>"
+}
+```
+
+| Status Code | Meaning                          |
+|-------------|----------------------------------|
+| `400`       | Missing or empty parameter       |
+| `422`       | Invalid parameter type           |
+| `404`       | Profile not found                |
+| `500`       | Internal server error            |
+
+---
+
+## Database Schema
+
+```prisma
+model Profile {
+  id                   String   @id
+  name                 String   @unique
+  gender               String
+  gender_probability   Float
+  age                  Int
+  age_group            String
+  country_id           String
+  country_name         String
+  country_probability  Float
+  created_at           DateTime @default(now())
+}
+```
+
+---
+
+## Natural Language Query — How It Works
+
+The `/api/profiles/search` endpoint uses a **rule-based parser** (`parseNaturalLanguage`) that applies regex patterns to the query string and maps matched tokens to structured filter fields:
+
+1. **Gender detection** — matches words like `male`, `males`, `female`, `females`
+2. **Age group detection** — matches `teenager`, `adult`, `senior`, `child`
+3. **"Young" rule** — maps to `min_age=16`, `max_age=24`
+4. **Age comparison** — matches phrases like `above 30`, `over 25`, `older than 18`
+5. **Country detection** — maps country names to ISO codes (e.g. `nigeria` → `NG`)
+
+If no filters can be extracted from the query, the API returns an error response rather than returning all records.
+
+---
+
+## CORS
+
+All endpoints include the header:
+
+```
+Access-Control-Allow-Origin: *
+```
+
+---
+
+## Scripts
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm start:dev          # Run in development (watch mode)
+pnpm build              # Compile TypeScript
+pnpm start:prod         # Run compiled build
+pnpm prisma migrate dev # Create and apply a new migration
+pnpm prisma db seed     # Seed the database
+pnpm prisma studio      # Open Prisma Studio (DB GUI)
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
-# stage-2-task
