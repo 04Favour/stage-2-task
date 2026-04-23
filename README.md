@@ -68,7 +68,7 @@ Server runs at `http://localhost:3009`.
 ### Base URL
 
 ```
-http://localhost:3009
+https://stage-2-task-l9dj.vercel.app/
 ```
 
 ---
