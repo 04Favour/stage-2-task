@@ -6,11 +6,13 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidation } from './common/env.validation';
 
 @Module({
-  imports: [ConfigModule.forRoot({
-    isGlobal: true,
-    validationSchema: envValidation,
-    envFilePath: '.env'
-  })],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidation,
+      envFilePath: '.env',
+    }),
+  ],
   controllers: [ProfilesController],
   providers: [ProfilesService, PrismaService],
 })

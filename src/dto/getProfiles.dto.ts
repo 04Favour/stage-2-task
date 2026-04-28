@@ -13,7 +13,9 @@ export class GetProfilesDto {
   // --- Filters ---
 
   @IsOptional()
-  @IsIn(['male', 'female'], { message: 'gender must be either "male" or "female"' })
+  @IsIn(['male', 'female'], {
+    message: 'gender must be either "male" or "female"',
+  })
   gender?: string;
 
   @IsOptional()
@@ -65,7 +67,8 @@ export class GetProfilesDto {
 
   @IsOptional()
   @IsIn(['age', 'created_at', 'name', 'gender_probability'], {
-    message: 'sort_by must be one of: age, created_at, name, gender_probability',
+    message:
+      'sort_by must be one of: age, created_at, name, gender_probability',
   })
   sort_by?: 'age' | 'created_at' | 'name' | 'gender_probability' = 'created_at';
 
